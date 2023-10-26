@@ -2,6 +2,7 @@
 #include <iomanip>
 #include <functional>
 #include "schrodinger.h"
+#include "bisection.h"
 #include <cmath>
 
 double schrodinger(double psi, double E, std::function<double(double)> potential)
@@ -164,7 +165,9 @@ int main()
     auto fxn = [&] (double x, double y) -> double{return schro.query(x, y);};
 
     //verlet(x_first, x_last, dx, schro, fxn, true);
+    auto bisect = Bisection(dx, x_first, x_last, y_init, 0.00000001);
+    bisect.bisection(-1, 1.7, quad_potl, true);
 
-    bisection(4.2, 4.9, quad_potl, true);
+    //bisection(4.2, 4.9, quad_potl, true);
     //verlet(x_first, x_last, dx, y_init, y_prime_init, sho);
 }

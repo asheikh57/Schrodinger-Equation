@@ -150,7 +150,83 @@ double Bisection::bisection(double lower, double upper, std::function<double(dou
 
 double Bisection::bisection(double lower, double upper, std::function<double(double)> potential, bool debug)
 {
-    return 0;
+   double upper_copy = upper;
+   double lower_copy = lower;
+
+   double e_guess = (upper_copy + lower_copy) / 2;
+   Schrodinger schro = Schrodinger(e_guess, potential);
+
+   double bound_odd, bound_even;
+
+   auto fxn = [&] (double x, double y) -> double{return schro.query(x, y);};
+   
+
+   if(debug) std::cout << "\n=== ODD BISECTION ===\n" << std::endl;
+
+   for(int i = 0; i < 50; i++)
+   {
+       bound_odd = verlet(x_first, x_last, dx, schro, fxn, false);
+
+       if(debug) std::cout << e_guess << std::endl;
+
+
+       if(bound_odd < 0)
+       {
+	   lower_copy = e_guess;
+	   e_guess = (lower_copy + upper_copy) / 2;
+	   schro.setEnergy(e_guess);
+       }
+
+       else if(bound_odd > 0) 
+       { 
+	   upper_copy = e_guess;
+	   e_guess = (lower_copy + upper_copy) / 2;
+	   schro.setEnergy(e_guess);
+       }
+
+   }
+
+
+   upper_copy = upper;
+   lower_copy = lower;
+
+   if(debug) std::cout << "\n=== EVEN BISECTION ===\n" << std::endl;
+   
+   for(int i = 0; i < 50; i++)
+   {
+       bound_even = verlet(x_first, x_last, dx, schro, fxn, false);
+
+       if(debug) std::cout << e_guess << std::endl;
+
+
+       if(bound_even > 0)
+       {
+	   lower_copy = e_guess;
+	   e_guess = (lower_copy + upper_copy) / 2;
+	   schro.setEnergy(e_guess);
+       }
+
+       else if(bound_even < 0) 
+       { 
+	   upper_copy = e_guess;
+	   e_guess = (lower_copy + upper_copy) / 2;
+	   schro.setEnergy(e_guess);
+       }
+
+   }
+
+   if(bound_odd < bound_even)
+   {
+       if(debug) std::cout << "\n=== CHOSEN ODD BISECTION ===\n" << std::endl;
+       return bisectionOdd(lower, upper, potential, debug);
+   }
+
+   else
+   {
+       if(debug) std::cout << "\n=== CHOSEN EVEN BISECTION ===\n" << std::endl; 
+       return bisectionEven(lower, upper, potential, debug);
+   }
+   
 }
 
 Bisection::~Bisection() {};
