@@ -116,7 +116,7 @@ double bisection(double lower, double upper, std::function<double(double)> poten
 
    auto fxn = [&] (double x, double y) -> double{return schro.query(x, y);};
    
-   double accuracy = 0.00001;
+   double accuracy = 0.00000001;
 
    while(fabs(bound) > accuracy)
    {
@@ -124,20 +124,22 @@ double bisection(double lower, double upper, std::function<double(double)> poten
 
        if(debug) std::cout << e_guess << std::endl;
 
-       if(bound > accuracy) 
-       { 
-	   upper = e_guess;
-	   e_guess = (lower + upper) / 2;
-	   schro.setEnergy(e_guess);
-       }
-       else if(bound < -accuracy)
+
+       if(bound > 0)
        {
 	   lower = e_guess;
 	   e_guess = (lower + upper) / 2;
 	   schro.setEnergy(e_guess);
        }
-   }
 
+       else if(bound < 0) 
+       { 
+	   upper = e_guess;
+	   e_guess = (lower + upper) / 2;
+	   schro.setEnergy(e_guess);
+       }
+
+   }
    
    return e_guess;
 }
@@ -156,13 +158,13 @@ int main()
     double y_init = 0;
     double y_prime_init = 10;
 
-    double e = 0.5;
+    double e = 0.475;
 
     auto schro = Schrodinger(e, quad_potl);
     auto fxn = [&] (double x, double y) -> double{return schro.query(x, y);};
 
     //verlet(x_first, x_last, dx, schro, fxn, true);
 
-    bisection(0.4, 0.6, quad_potl, true);
+    bisection(0.1, 1.45, quad_potl, true);
     //verlet(x_first, x_last, dx, y_init, y_prime_init, sho);
 }
