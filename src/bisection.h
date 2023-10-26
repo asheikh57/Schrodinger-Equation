@@ -2,7 +2,7 @@
 
 #ifndef B_H
 #define B_H
-class BisectionConfig
+class Bisection
 {
     private:
         double dx;
@@ -12,7 +12,7 @@ class BisectionConfig
 	double accuracy;
 
     public:
-	BisectionConfig(double dx, double x_first, double x_last, double y_init, double accuracy);
+	Bisection(double dx, double x_first, double x_last, double y_init, double accuracy);
 
 	// Setters
 	void setDX(double dx);
@@ -37,7 +37,7 @@ class BisectionConfig
 
         double bisection(double lower, double upper, std::function<double(double)> potential, bool debug);
 
-	~BisectionConfig();
+	~Bisection();
 };
 
 
