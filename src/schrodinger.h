@@ -17,7 +17,9 @@ class Schrodinger
       double getEnergy();
 
       double query(double x_query, double y_query);
-      double initial_conditions(double x_query);
+      double initialConditions(double x_query);
+
+      ~Schrodinger();
 };
 
 

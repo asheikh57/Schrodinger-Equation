@@ -30,9 +30,11 @@ double Schrodinger::query(double x_query, double y_query)
     return 2 * ( potential(x_query) - E ) * y_query;
 }
 
-double Schrodinger::initial_conditions(double x_query)
+double Schrodinger::initialConditions(double x_query)
 {
     return exp( -sqrt( 2 * ( potential(x_query) - E ) ) * fabs(x_query) );
 }
+
+Schrodinger::~Schrodinger() {};
 
 

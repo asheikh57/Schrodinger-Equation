@@ -72,12 +72,12 @@ double verlet(double x_first,
 	    bool log)
 {
     double x_curr = x_first;
-    double y_curr = schro.initial_conditions(x_first);
+    double y_curr = schro.initialConditions(x_first);
     double y_last = y_curr;
     if(log) std::cout << x_curr << "," << y_curr << std::endl;
     
     x_curr += dx;
-    y_curr = schro.initial_conditions(x_curr);
+    y_curr = schro.initialConditions(x_curr);
 
     if(log) std::cout << x_curr << "," << y_curr << std::endl;
 
@@ -165,6 +165,6 @@ int main()
 
     //verlet(x_first, x_last, dx, schro, fxn, true);
 
-    bisection(0.1, 1.45, quad_potl, true);
+    bisection(4.2, 4.9, quad_potl, true);
     //verlet(x_first, x_last, dx, y_init, y_prime_init, sho);
 }
