@@ -10,6 +10,12 @@ class Schrodinger
 
    public:
       Schrodinger(double energy, std::function<double(double)> potential_fxn);
+
+      void setEnergy(double energy);
+      void setPotential(std::function<double(double)> potential);
+
+      double getEnergy();
+
       double query(double x_query, double y_query);
       double initial_conditions(double x_query);
 };

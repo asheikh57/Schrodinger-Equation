@@ -1,7 +1,8 @@
-#include<iostream>
-#include<iomanip>
-#include<functional>
+#include <iostream>
+#include <iomanip>
+#include <functional>
 #include "schrodinger.h"
+#include <cmath>
 
 double schrodinger(double psi, double E, std::function<double(double)> potential)
 {
@@ -23,7 +24,7 @@ double verlet_proc(double dx, double x, double psi_curr, double psi_prev, std::f
     return 2*psi_curr - psi_prev + func(x, psi_curr) * dx * dx;
 }
 
-void verlet(double x_first,
+double verlet(double x_first,
 	    double x_last,	
 	    double dx, 
 	    double y_init, 
@@ -59,26 +60,26 @@ void verlet(double x_first,
 
     }
 
-    
+    return y_curr;
 }
 
 
-void verlet(double x_first,
+double verlet(double x_first,
 	    double x_last,	
 	    double dx, 
 	    Schrodinger schro,
-	    std::function<double(double, double)> func)
+	    std::function<double(double, double)> func,
+	    bool log)
 {
     double x_curr = x_first;
     double y_curr = schro.initial_conditions(x_first);
     double y_last = y_curr;
-
-    std::cout << x_curr << "," << y_curr << std::endl;
+    if(log) std::cout << x_curr << "," << y_curr << std::endl;
     
     x_curr += dx;
     y_curr = schro.initial_conditions(x_curr);
 
-    std::cout << x_curr << "," << y_curr << std::endl;
+    if(log) std::cout << x_curr << "," << y_curr << std::endl;
 
     int num_iters = ((x_last - x_first) / dx);
     double y_next;
@@ -92,11 +93,54 @@ void verlet(double x_first,
 	y_curr = y_next;
 
 
-        std::cout << x_curr << "," << y_curr << std::endl;
+        if(log) std::cout << x_curr << "," << y_curr << std::endl;
 
     }
 
- }    
+    return y_curr;
+
+ }
+
+double bisection(double lower, double upper, std::function<double(double)> potential, bool debug) 
+{
+
+   double e_guess = (upper + lower) / 2;
+   Schrodinger schro = Schrodinger(e_guess, potential);
+
+   double dx = 0.001;
+   double x_first = -5;
+   double x_last = 5;
+   double y_init = 0;
+
+   double bound = 1;
+
+   auto fxn = [&] (double x, double y) -> double{return schro.query(x, y);};
+   
+   double accuracy = 0.00001;
+
+   while(fabs(bound) > accuracy)
+   {
+       bound = verlet(x_first, x_last, dx, schro, fxn, false);
+
+       if(debug) std::cout << e_guess << std::endl;
+
+       if(bound > accuracy) 
+       { 
+	   upper = e_guess;
+	   e_guess = (lower + upper) / 2;
+	   schro.setEnergy(e_guess);
+       }
+       else if(bound < -accuracy)
+       {
+	   lower = e_guess;
+	   e_guess = (lower + upper) / 2;
+	   schro.setEnergy(e_guess);
+       }
+   }
+
+   
+   return e_guess;
+}
 
 double quad_potl(double x)
 {
@@ -106,18 +150,19 @@ double quad_potl(double x)
 int main()
 {
     //std::cout << "Hello World \n";
-    double dx = 0.01;
+    double dx = 0.001;
     double x_first = -5;
     double x_last = 5;
     double y_init = 0;
     double y_prime_init = 10;
 
-    double e = 1.5;
+    double e = 0.5;
 
     auto schro = Schrodinger(e, quad_potl);
     auto fxn = [&] (double x, double y) -> double{return schro.query(x, y);};
 
-    verlet(x_first, x_last, dx, schro, fxn);
+    //verlet(x_first, x_last, dx, schro, fxn, true);
 
+    bisection(0.4, 0.6, quad_potl, true);
     //verlet(x_first, x_last, dx, y_init, y_prime_init, sho);
 }
