@@ -97,6 +97,11 @@ double verlet(double x_first,
 	      Schrodinger schro,
 	      bool log)
 {
+    // Verlet integration to solve second order differential equation with good accuracy
+    // Applied specifically for Schrodinger equation
+    //
+    // Data and equation for schrodinger encapsulated with Schrodinger object "schro"
+    
     double norm_factor = normalize(x_first, x_last, dx, schro);
     auto func = [&] (double x, double y) -> double{return schro.query(x, y);};
     double x_curr = x_first;
