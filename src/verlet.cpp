@@ -2,6 +2,7 @@
 #include <iomanip>
 #include <functional>
 #include "schrodinger.h"
+#include "bisection.h"
 #include <cmath>
 
 double schrodinger(double psi, double E, std::function<double(double)> potential)
@@ -72,12 +73,12 @@ double verlet(double x_first,
 	    bool log)
 {
     double x_curr = x_first;
-    double y_curr = schro.initial_conditions(x_first);
+    double y_curr = schro.initialConditions(x_first);
     double y_last = y_curr;
     if(log) std::cout << x_curr << "," << y_curr << std::endl;
     
     x_curr += dx;
-    y_curr = schro.initial_conditions(x_curr);
+    y_curr = schro.initialConditions(x_curr);
 
     if(log) std::cout << x_curr << "," << y_curr << std::endl;
 
@@ -116,7 +117,7 @@ double bisection(double lower, double upper, std::function<double(double)> poten
 
    auto fxn = [&] (double x, double y) -> double{return schro.query(x, y);};
    
-   double accuracy = 0.00001;
+   double accuracy = 0.00000001;
 
    while(fabs(bound) > accuracy)
    {
@@ -124,20 +125,22 @@ double bisection(double lower, double upper, std::function<double(double)> poten
 
        if(debug) std::cout << e_guess << std::endl;
 
-       if(bound > accuracy) 
-       { 
-	   upper = e_guess;
-	   e_guess = (lower + upper) / 2;
-	   schro.setEnergy(e_guess);
-       }
-       else if(bound < -accuracy)
+
+       if(bound > 0)
        {
 	   lower = e_guess;
 	   e_guess = (lower + upper) / 2;
 	   schro.setEnergy(e_guess);
        }
-   }
 
+       else if(bound < 0) 
+       { 
+	   upper = e_guess;
+	   e_guess = (lower + upper) / 2;
+	   schro.setEnergy(e_guess);
+       }
+
+   }
    
    return e_guess;
 }
@@ -147,22 +150,35 @@ double quad_potl(double x)
    return 0.5*x*x;
 }
 
+double quart_potl(double x)
+{
+   return 0.25*x*x*x*x;
+}
+
 int main()
 {
     //std::cout << "Hello World \n";
-    double dx = 0.001;
+    double dx = 0.02;
     double x_first = -5;
     double x_last = 5;
     double y_init = 0;
     double y_prime_init = 10;
 
-    double e = 0.5;
+    double e = 0.475;
 
-    auto schro = Schrodinger(e, quad_potl);
-    auto fxn = [&] (double x, double y) -> double{return schro.query(x, y);};
+    //auto schro = Schrodinger(e, quart_potl);
+    //auto fxn = [&] (double x, double y) -> double{return schro.query(x, y);};
 
     //verlet(x_first, x_last, dx, schro, fxn, true);
+    auto bisect = Bisection(dx, x_first, x_last, y_init, 0);
+    e = bisect.bisection(2, 3, quart_potl, false);
+//e = 0.42080497440704378586673328754841350018978;
+//e = 0.4208049737199388573571923188865184783935546875;
+    auto schro = Schrodinger(e, quart_potl);
 
-    bisection(0.4, 0.6, quad_potl, true);
+    auto fxn = [&] (double x, double y) -> double{return schro.query(x, y);};
+    verlet(x_first, x_last, dx, schro, fxn, true);
+
+    //bisection(4.2, 4.9, quad_potl, true);
     //verlet(x_first, x_last, dx, y_init, y_prime_init, sho);
 }
