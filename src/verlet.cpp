@@ -150,10 +150,15 @@ double quad_potl(double x)
    return 0.5*x*x;
 }
 
+double quart_potl(double x)
+{
+   return 0.25*x*x*x*x;
+}
+
 int main()
 {
     //std::cout << "Hello World \n";
-    double dx = 0.001;
+    double dx = 0.02;
     double x_first = -5;
     double x_last = 5;
     double y_init = 0;
@@ -161,12 +166,18 @@ int main()
 
     double e = 0.475;
 
-    auto schro = Schrodinger(e, quad_potl);
-    auto fxn = [&] (double x, double y) -> double{return schro.query(x, y);};
+    //auto schro = Schrodinger(e, quart_potl);
+    //auto fxn = [&] (double x, double y) -> double{return schro.query(x, y);};
 
     //verlet(x_first, x_last, dx, schro, fxn, true);
-    auto bisect = Bisection(dx, x_first, x_last, y_init, 0.00000001);
-    bisect.bisection(-1, 1.7, quad_potl, true);
+    auto bisect = Bisection(dx, x_first, x_last, y_init, 0);
+    e = bisect.bisection(2, 3, quart_potl, false);
+//e = 0.42080497440704378586673328754841350018978;
+//e = 0.4208049737199388573571923188865184783935546875;
+    auto schro = Schrodinger(e, quart_potl);
+
+    auto fxn = [&] (double x, double y) -> double{return schro.query(x, y);};
+    verlet(x_first, x_last, dx, schro, fxn, true);
 
     //bisection(4.2, 4.9, quad_potl, true);
     //verlet(x_first, x_last, dx, y_init, y_prime_init, sho);

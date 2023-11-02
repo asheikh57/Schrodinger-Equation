@@ -1,14 +1,18 @@
 #include <iostream>
 #include <cmath>
+#include <iomanip>
+#include <limits>
 
 #include "bisection.h"
 #include "schrodinger.h"
 #include "verlet.h"
 
 
-
 Bisection::Bisection(double dx, double x_first, double x_last, double y_init, double accuracy)
 {
+
+    //std::cout.unsetf(std::ios::floatfield);
+    //std::cout << std::setprecision(128);
     this->dx = dx;
     this->x_first = x_first;
     this->x_last = x_last;
@@ -73,13 +77,14 @@ double Bisection::bisectionEven(double lower, double upper, std::function<double
 {
 
    double e_guess = (upper + lower) / 2;
+   double e_guess_prior = e_guess - accuracy - 1;
    Schrodinger schro = Schrodinger(e_guess, potential);
 
    double bound = 1;
 
    auto fxn = [&] (double x, double y) -> double{return schro.query(x, y);};
    
-   while(fabs(bound) > accuracy)
+   while(fabs(e_guess - e_guess_prior) > accuracy / 2)
    {
        bound = verlet(x_first, x_last, dx, schro, fxn, false);
 
@@ -89,6 +94,7 @@ double Bisection::bisectionEven(double lower, double upper, std::function<double
        if(bound > 0)
        {
 	   lower = e_guess;
+	   e_guess_prior = e_guess;
 	   e_guess = (lower + upper) / 2;
 	   schro.setEnergy(e_guess);
        }
@@ -96,6 +102,7 @@ double Bisection::bisectionEven(double lower, double upper, std::function<double
        else if(bound < 0) 
        { 
 	   upper = e_guess;
+	   e_guess_prior = e_guess;
 	   e_guess = (lower + upper) / 2;
 	   schro.setEnergy(e_guess);
        }
@@ -109,6 +116,7 @@ double Bisection::bisectionOdd(double lower, double upper, std::function<double(
 {
 
    double e_guess = (upper + lower) / 2;
+   double e_guess_prior = e_guess - accuracy - 1;
    Schrodinger schro = Schrodinger(e_guess, potential);
 
    double bound = 1;
@@ -116,7 +124,7 @@ double Bisection::bisectionOdd(double lower, double upper, std::function<double(
    auto fxn = [&] (double x, double y) -> double{return schro.query(x, y);};
    
 
-   while(fabs(bound) > accuracy)
+   while(fabs(e_guess - e_guess_prior) > accuracy / 2)
    {
        bound = verlet(x_first, x_last, dx, schro, fxn, false);
 
@@ -126,6 +134,7 @@ double Bisection::bisectionOdd(double lower, double upper, std::function<double(
        if(bound < 0)
        {
 	   lower = e_guess;
+	   e_guess_prior = e_guess;
 	   e_guess = (lower + upper) / 2;
 	   schro.setEnergy(e_guess);
        }
@@ -133,6 +142,7 @@ double Bisection::bisectionOdd(double lower, double upper, std::function<double(
        else if(bound > 0) 
        { 
 	   upper = e_guess;
+	   e_guess_prior = e_guess;
 	   e_guess = (lower + upper) / 2;
 	   schro.setEnergy(e_guess);
        }
