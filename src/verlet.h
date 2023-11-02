@@ -20,6 +20,5 @@ double verlet(double x_first,
 	    double x_last,	
 	    double dx, 
 	    Schrodinger schro,
-	    std::function<double(double, double)> func,
 	    bool log);
 #endif

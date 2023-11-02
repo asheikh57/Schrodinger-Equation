@@ -86,7 +86,7 @@ double Bisection::bisectionEven(double lower, double upper, std::function<double
    
    while(fabs(e_guess - e_guess_prior) > accuracy / 2)
    {
-       bound = verlet(x_first, x_last, dx, schro, fxn, false);
+       bound = verlet(x_first, x_last, dx, schro, false);
 
        if(debug) std::cout << e_guess << std::endl;
 
@@ -126,7 +126,7 @@ double Bisection::bisectionOdd(double lower, double upper, std::function<double(
 
    while(fabs(e_guess - e_guess_prior) > accuracy / 2)
    {
-       bound = verlet(x_first, x_last, dx, schro, fxn, false);
+       bound = verlet(x_first, x_last, dx, schro, false);
 
        if(debug) std::cout << e_guess << std::endl;
 
@@ -160,25 +160,42 @@ double Bisection::bisection(double lower, double upper, std::function<double(dou
 
 double Bisection::bisection(double lower, double upper, std::function<double(double)> potential, bool debug)
 {
+   //*********************************
+   // AUTOMATIC BISECTION SELECTION
+   //*********************************
+   
+
+   //*********************************
+   // INITIALIZATION
+   // ********************************
+   
    double upper_copy = upper;
    double lower_copy = lower;
 
    double e_guess = (upper_copy + lower_copy) / 2;
+   double e_guess_prior = e_guess;
+
    Schrodinger schro = Schrodinger(e_guess, potential);
 
    double bound_odd, bound_even;
 
    auto fxn = [&] (double x, double y) -> double{return schro.query(x, y);};
+
+
+   //**********************************
+   // ODD BISECTION ATTEMPT
+   //**********************************
    
 
    if(debug) std::cout << "\n=== ODD BISECTION ===\n" << std::endl;
 
-   for(int i = 0; i < 50; i++)
+   for(int i = 0; i < 25; i++)
    {
-       bound_odd = verlet(x_first, x_last, dx, schro, fxn, false);
+       bound_odd = verlet(x_first, x_last, dx, schro, false);
 
        if(debug) std::cout << e_guess << std::endl;
 
+       e_guess_prior = e_guess;
 
        if(bound_odd < 0)
        {
@@ -196,18 +213,34 @@ double Bisection::bisection(double lower, double upper, std::function<double(dou
 
    }
 
+   // Point here is to quantify the rate of convergence of the odd method
+
+   double odd_acc = fabs(e_guess - e_guess_prior);
+
+   // Deals with edge cases, where bisection converges to the lower or upper bounds,
+   // which is undesirable and given a "high" score to mark it as bad/wrong
+  
+   if(fabs(e_guess - lower) < 1e-6 || fabs(e_guess - upper) < 1e-6) odd_acc = 1e+100;
+
+   //***************************************
+   // EVEN BISECTION ATTEMPT
+   //***************************************
 
    upper_copy = upper;
    lower_copy = lower;
 
+   e_guess = (upper_copy + lower_copy) / 2;
+   e_guess_prior = e_guess;
+
    if(debug) std::cout << "\n=== EVEN BISECTION ===\n" << std::endl;
    
-   for(int i = 0; i < 50; i++)
+   for(int i = 0; i < 25; i++)
    {
-       bound_even = verlet(x_first, x_last, dx, schro, fxn, false);
+       bound_even = verlet(x_first, x_last, dx, schro, false);
 
        if(debug) std::cout << e_guess << std::endl;
 
+       e_guess_prior = e_guess;
 
        if(bound_even > 0)
        {
@@ -224,8 +257,19 @@ double Bisection::bisection(double lower, double upper, std::function<double(dou
        }
 
    }
+   
+   // quantify rate of convergence -- search more convergent one
+   double even_acc = fabs(e_guess - e_guess_prior);
 
-   if(bound_odd < bound_even)
+   // disqualify if converges to upper or lower bound
+   if(fabs(e_guess - lower) < 1e-6 || fabs(e_guess - upper) < 1e-6) even_acc = 1e+100;
+
+
+   //**********************************
+   // SELECTING EVEN OR ODD BISECTION
+   //**********************************
+
+   if(odd_acc < even_acc)
    {
        if(debug) std::cout << "\n=== CHOSEN ODD BISECTION ===\n" << std::endl;
        return bisectionOdd(lower, upper, potential, debug);
