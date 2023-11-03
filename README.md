@@ -1,5 +1,8 @@
-# Schrodinger-Equation
+# Schrödinger-Equation
 Using verlet method to solve the Schrödinger equation for an arbitrary potential and bisection method to solve for eigen-energies
+
+## Getting Started
+To change code and potentials, currently refer to `verlet.cpp` under src, the main function here solves for an eigen-energy within some bounds and outputs the numerical solution due to verlet. To compile the file into an executable use `build.sh`, to compile and output to a `.csv` file run `run.sh` with an argument for the filename (including extension).
 
 ## Background
 
