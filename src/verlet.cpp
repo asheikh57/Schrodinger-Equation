@@ -66,11 +66,11 @@ double normalize(double x_first,
     double y_curr = schro.initialConditions(x_first);
     double y_last = y_curr;
 
-    norm_factor += y_curr * dx;
+    norm_factor += fabs(y_curr) * dx;
 
     x_curr += dx;
     y_curr = schro.initialConditions(x_curr);
-    norm_factor += y_curr * dx;
+    norm_factor += y_curr*y_curr * dx;
 
     int num_iters = ((x_last - x_first) / dx);
     double y_next;
@@ -83,7 +83,7 @@ double normalize(double x_first,
 
 	y_last = y_curr;
 	y_curr = y_next;
-        norm_factor += y_curr * dx;
+        norm_factor += fabs(y_curr) * dx;
     }
 
     return norm_factor;
@@ -97,17 +97,24 @@ double verlet(double x_first,
 	      Schrodinger schro,
 	      bool log)
 {
+    // Verlet integration to solve second order differential equation with good accuracy
+    // Applied specifically for Schrodinger equation
+    //
+    // Data and equation for schrodinger encapsulated with Schrodinger object "schro"
+    
     double norm_factor = normalize(x_first, x_last, dx, schro);
     auto func = [&] (double x, double y) -> double{return schro.query(x, y);};
     double x_curr = x_first;
     double y_curr = schro.initialConditions(x_first);
     double y_last = y_curr;
-    if(log) std::cout << x_curr << "," << y_curr / norm_factor << std::endl;
+    double e = schro.getEnergy();
+
+    if(log) std::cout << x_curr << "," << e + y_curr / norm_factor << std::endl;
     
     x_curr += dx;
     y_curr = schro.initialConditions(x_curr);
 
-    if(log) std::cout << x_curr << "," << y_curr / norm_factor << std::endl;
+    if(log) std::cout << x_curr << "," << e + y_curr / norm_factor << std::endl;
 
     int num_iters = ((x_last - x_first) / dx);
     double y_next;
@@ -121,7 +128,7 @@ double verlet(double x_first,
 	y_curr = y_next;
 
 
-        if(log) std::cout << x_curr << "," << y_curr / norm_factor << std::endl;
+        if(log) std::cout << x_curr << "," << e + y_curr / norm_factor << std::endl;
 
     }
 
@@ -151,10 +158,9 @@ int main()
     double e = 0.475;
 
     auto bisect = Bisection(dx, x_first, x_last, y_init, 0);
-    e = bisect.bisection(0.2, 0.5, quart_potl, false);
+    e = bisect.bisection(6.5, 9, quart_potl, false);
     auto schro = Schrodinger(e, quart_potl);
 
-    auto fxn = [&] (double x, double y) -> double{return schro.query(x, y);};
     verlet(x_first, x_last, dx, schro, true);
 
 }
