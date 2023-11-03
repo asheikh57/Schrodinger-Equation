@@ -158,7 +158,7 @@ int main()
     double e = 0.475;
 
     auto bisect = Bisection(dx, x_first, x_last, y_init, 0);
-    e = bisect.bisection(1, 2, quart_potl, false);
+    e = bisect.bisection(6.5, 9, quart_potl, false);
     auto schro = Schrodinger(e, quart_potl);
 
     verlet(x_first, x_last, dx, schro, true);
