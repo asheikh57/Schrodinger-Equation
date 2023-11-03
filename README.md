@@ -105,4 +105,6 @@ The quartic potential, or:
 ```math
 V(x) = \frac 1 4 x^4
 ```
-when put into the Schrödinger equation does not have an analytic solution, hence numerical methods reign supreme here. 
+when put into the Schrödinger equation does not have an analytic solution, hence numerical methods reign supreme here. After running the algorithm and solving for the eigen-energies we get this graph showing the different states and their energies (added as offsets to the eigen-functions to illustrate how the potential affects the solution)
+
+![quartic](images/quartic_potential.png)
